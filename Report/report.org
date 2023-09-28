@@ -6,6 +6,15 @@
 #+LATEX_COMPILER: xelatex
 #+OPTIONS: toc:nil num:2
 
+* Real time I/O for Microphone Signal
+** Features
+- Reads input data via MEMS microphone module (`SEN0487`), and transfers it to memory (through `DMA`)
+- Displays the dominant frequency in 16x2 LCD display (through `I2C`)
+- A button for simulating robot effect in input (via fast delay)
+- Saves the processed input to SD card (through `SPI`)
+- During debugging, live data can be read (via `UART`). Only display / save output if there is sound activity detected.
+
+Supported in STM32F411RE
 
 * Hardware Connections
 For this project, we have used different hardware tools connected to each other for taking input, processing, and showing output data. The overall architecture is as follows:
@@ -324,10 +333,6 @@ If the frequency of input data is
 
 
 For example, if the robot effect is on, and the dominant frequency is 1234Hz, then the output will be ~Max = 1234   R 1~
-* Challenges Faced
-- Abhaas Goyal (u7145384): Learning the bolts and nuts of digital signal processing and how it can be used for the project. Also learnt a lot on how to work with a team partner who has very different strengths than yourself. Integrating external library of CMSIS was also enriching w.r.t. learning. Learnt some theoretical concepts from my project partner and the tutors
-
-- Kaushiki Jadhav (u7423787): Understanding of logic behind the task and event in theory was within my grasp but I had a lot of difficulty in implementing that theoretical knowledge into programming.
 
 * References
 [1] T-Filter http://t-filter.engineerjs.com/ \\
