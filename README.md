@@ -11,6 +11,8 @@ Supported in STM32F411RE
 
 # Hardware Connections
 
+![Architecture](Report/images/Architecture.png)
+
 The hardware and the relevant protocols are as follows:
 
 ## Microphone
@@ -116,6 +118,7 @@ The Q15 number has a integral range between `(-2^16)` and `(2^16 - 1)`, scaled u
 -   This process is continued in a circular manner.
 -   In this project we are working with a large amount of data hence DMA is working as the pipeline for storing data in buffers and also sending data to UART.
 
+![Data Flow](Report/images/IO_Buffer_Structure.png)
 
 ## Interrupts
 
@@ -181,10 +184,14 @@ The causal relations are defined as
 
 # Data processing
 
+![Processing](Report/images/Processing.png)
+
 To process the data in the MCU, the CMSIS DSP software library is used (v4.35) [2]. In particular `arm_math.h` library and lib file are imported into the project which has functions on FIR filtering, FFT transforms, maximal amplitudes, etc.
 
 
 ## High pass filter
+
+![Filter](Report/images/Filter.png)
 
 -   A high pass filter is a filter that passes high-frequency signals and blocks, or impedes, low-frequency signals. For this step, we use a custom FIR filter which is used to remove frequencies below 200Hz.
 -   The corresponding FIR filter is designed by using T-Filter [1]. Using this software, we got the desired tap values that is filter coefficient values for implementing the high pass filter in the project. For designing set values according to project task requirements which are as follows:
@@ -268,6 +275,7 @@ That data again passed to a high pass filter to remove low-frequency data create
 
 
 ### Output
+![SD](Report/images/SD_Read.png)
 
 -   The same speech &ldquo;Hello testing UART&rdquo; gives two different types of outputs on the basis of whether the robot effect is on or not. As shown in figure 5, the first disturbance is without the robot effect and the second disturbance is with the robot effect (spaced out amplitudes but having higher overall frequency due to meshing of sound), we can see the transformation in the signals before and after processing.
 -   In the first disturbance, only low-frequency signals are filtered out where the amplitude of the signals is less and no delay in the signals.
