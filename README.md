@@ -1,4 +1,4 @@
-# Real time I/O for Microphone Signal
+# Real time DSP for MEMS Microphone
 
 ## Features
 - Reads input data via MEMS microphone module (`SEN0487`), and transfers it to memory (through `DMA`)
