@@ -1,4 +1,4 @@
-% Created 2022-06-08 Wed 11:26
+% Created 2022-06-08 Wed 16:49
 % Intended LaTeX compiler: xelatex
 \documentclass[11pt]{article}
 \usepackage{graphicx}
@@ -12,11 +12,11 @@
 \usepackage{hyperref}
 \input{header.tex}
 \setcounter{secnumdepth}{2}
-\author{Abhaas Goyal \& Kaushiki Jadhav}
+\author{Abhaas Goyal* \& Kaushiki Jadhav}
 \date{\today}
 \title{ENGN4213 Report}
 \hypersetup{
- pdfauthor={Abhaas Goyal \& Kaushiki Jadhav},
+ pdfauthor={Abhaas Goyal* \& Kaushiki Jadhav},
  pdftitle={ENGN4213 Report},
  pdfkeywords={},
  pdfsubject={},
@@ -29,8 +29,8 @@
 
 
 \section{Hardware Connections}
-\label{sec:orge2f46f7}
-Here in this project, we have used different hardware tools and connected to each other for taking input data, processing data, and showing output data which are explained below:
+\label{sec:orgfb0b5ae}
+For this project, we have used different hardware tools connected to each other for taking input, processing, and showing output data. The overall architecture is as follows:
 
 \begin{figure}[H]
     \centering
@@ -38,55 +38,70 @@ Here in this project, we have used different hardware tools and connected to eac
     \caption{Overall Architecture}
     \end{figure}
 
+The hardware and the relevant protocols are as follows:
 \subsection{Microphone}
-\label{sec:org609154e}
+\label{sec:orgb241077}
 
 \begin{itemize}
 \item Protocols used => \textbf{ADC + DMA}
 \end{itemize}
 
-We use a Female MEMS microphone module (SEN0487 - Manufacturer DFROBOT [MIC Module (V1.0) [21BLg] 65Z5]) having a gain of 66. This module can be used at both 3.3V/5V (downscaling of 5V -> 3.3V is present in the module itself). For the purposes of long time safety, we use the 3.3V version. We can get an acoustic waveform by ADC sampling from the initial analog input audio signal from the microphone. When there is no input signal then its output voltage is around 0.66*VCC.
+We use a Female MEMS microphone module \texttt{SEN0487 - Manufacturer DFROBOT [MIC Module (V1.0) [21BLg] 65Z5]} which has a gain of 66. This module can be used at both 3.3V/5V (downscaling of 5V -> 3.3V is present in the module itself). For the purposes of long time safety, we use the 3.3V version. We can get an acoustic waveform by ADC sampling from the initial analog input audio signal from the microphone. When there is no input signal then its output voltage is around 0.66*VCC. \\
 
-Here microphone is used as an input device for the project which gives acoustic waves signals to ADC for further process of the project. The microphone’s A pin is connected to the IN0 function of the ADC peripheral which is the A0/PA0 (since our initial input is analog so we need to have an ADC converter - given through this port).
+Here microphone is used as an input device for the project which gives acoustic waves signals to ADC for further process of the project. The microphone’s \texttt{A} pin is connected to the IN0 function of the ADC peripheral which is the \texttt{A0/PA0} (since our initial input is analog so we need to have an ADC converter - given through this port). \\
 
-To save unneccessary clock cycles to saving it to contiguous memory locations in the buffer and doing the fixed process of resolution again, this process is taken care of by the DMA. We use a circular buffer of a fixed size and the input is taken as half words (since we are using 12 bits for resolution - the maximum available in this module for maximal precision)
+To save unneccessary clock cycles to save it to contiguous memory locations in the buffer and doing the fixed process of resolution again, this process is taken care of by the DMA. We use a circular buffer of a fixed size and the input is taken as half words (since we are using 12 bits for resolution - the maximum available in this module for maximal precision).
 
 
 \subsection{SD Card}
-\label{sec:orgfa59839}
+\label{sec:org0bc22ef}
 
 \begin{itemize}
 \item Communication Protocol => \textbf{SPI}
 \end{itemize}
 
-The output data of the project is saved on an SD card. For connecting SD card with a microcontroller SD card adapter is used and which is connected to the SPI serial communication peripheral of the microcontroller. The used voltage is 5V for efficient usage of SD Card.
+SPI communication protocol supports full-duplex communication, which means data can be transmitted and received at the same time. It has good signal integrity, supports high-speed (near about 60M bits/sec) applications and its hardware connection is simple, and only four signal lines are needed. Along with that, the slave device does not need to be addressed. In this project we need to save a large amount of data at a high speed hence we used the SPI communication protocol (it is faster than UART and I2C communication protocol) for saving data on the SD card. \\
+
+The output data of the project is saved on an SD card. For connecting SD card with a microcontroller SD card adapter \texttt{Makerverse MicroSD Card Adapter (3.3 and 5V compatible - SKU: CE07926)} is used, which is connected to the SPI serial communication peripheral of the microcontroller. The used voltage is 5V for efficient usage of SD Card. We also send the data at 20 MB/s, which seems to be compatible with the SD Card that we use (supported upto 75MB/second).
 
 \subsection{LCD}
-\label{sec:org353e4a6}
+\label{sec:org56e7172}
 
 \begin{itemize}
 \item Communication Protocol => \textbf{I2C}
 \end{itemize}
 
-We use a \texttt{lcd-1602a-qapass} LCD module with soldered pins and inbuilt I2C module for communication
-LCD is connected to the I2C serial communication peripheral for showing a dominant frequency of the audio signal.
+I2C interface communication protocol has a low pin/signal count even with numerous devices on the bus which is a half-duplex protocol. That means data can transfer in a single or one direction. It is a medium speed of 10K – 3.4M bits per sec. Due to the high speed and the need to send the data to one direction (i.e. LCD), we have used the I2C interface communication protocol. The LCD is used to display the maximum frequency of the processed data and whether the robot effect is on or off. \\
+
+We use a \texttt{lcd-1602a-qapass} LCD module with soldered pins and inbuilt I2C module for communication. It is connected to the I2C serial communication peripheral for showing a dominant frequency of the audio signal and the status of the robot effect.
 
 \subsection{Push button}
-\label{sec:org9b8f643}
+\label{sec:org61b3168}
 
 \begin{itemize}
-\item Communication Protocol => \textbf{General Purpose Input}
+\item Communication Protocol => \textbf{GPIO}
 \end{itemize}
 
-for saving data files in sd card.
+There are two push buttons (black and blue colored) available on the Nucleo F411re microcontroller board (\texttt{B1} and \texttt{B2} respectively). B2 has been allocated to it's default functioning (resetting the system). Since we couldn’t use the \textbf{RESET} button for interrupting any task or event in the project, we added an \textbf{third external push button} which is used for closing a current file on SD card and opening a new file for saving data (and connected to \texttt{PC\_9}). \\
+
+The user-defined blue push button (\texttt{B1}) is used as an interrupt for toggling the robot effect (using the high privacy mode/not).
+
+\subsection{USB Peripheral display output}
+\label{sec:org1067e1e}
+
+\begin{itemize}
+\item Communication Protocol => \textbf{UART}
+
+UART interface communication protocol can be used without having a common clock signal. Even though the speed of UART is low (Around 200KB / sec), it's overhead is very low. For this, we have used the UART communication protocol for showing a large amount of the processed output data independent of the clock signal on the computer. Although, because of limitation on speed, we kept the sampling frequency at 4KHz for the implemention to show the correct results.
+\end{itemize}
 
 \section{Implementation}
-\label{sec:orge4b4b0b}
+\label{sec:orgc65004e}
 \subsection{Design Flow}
-\label{sec:org4a0a02e}
+\label{sec:orgc7efe6b}
 \begin{enumerate}
 \item Microphone sends data to Microcontroller at 4000Hz
-\item Through ADC and DMA, store store the data in input buffer
+\item Through ADC and DMA, store the data in input buffer
 \item Pass input data to a high pass filter to remove signals which have a frequency below 200 Hz.
 \item If robot effect is on, then enable privacy mode. Processing of privacy mode is done by the robot effect (implemented by fast delay) and then a different high pass filter is used (according to the person's voice) to remove low-frequency signals.
 \item The output data is shown on UART.
@@ -96,11 +111,11 @@ for saving data files in sd card.
 \end{enumerate}
 
 \subsection{Data Flow in Buffers}
-\label{sec:orgda4797a}
+\label{sec:org7c2293f}
 Since we are working on a large amount of continuous analog input data, where real-time processing needs to be implemented with constraints on the size of the buffer possible. Hence the frame based processing (block) is used to process the data. A 4 buffer ping-pong is used to processing a complete block of the sample, while the other half is being inputted.
 
 \subsubsection*{Pong Buffers used in the project:}
-\label{sec:org66eea40}
+\label{sec:org1a4e705}
 
 \begin{itemize}
 \item \texttt{q15\_t in\_buf [INPUT\_BUF\_SIZE]} = Used to store data or samples that are captured from a microphone
@@ -109,7 +124,7 @@ Since we are working on a large amount of continuous analog input data, where re
 \end{itemize}
 
 \subsubsection*{Pointers to buffer's are used to fill currently data in buffer at exact address:}
-\label{sec:orgbbc408a}
+\label{sec:org8016c2b}
 
 \begin{itemize}
 \item \texttt{q15\_t* in\_buf\_ptr} = Input buffer pointer
@@ -118,7 +133,7 @@ Since we are working on a large amount of continuous analog input data, where re
 \end{itemize}
 
 \subsubsection*{Size of buffers used in the project:}
-\label{sec:org25d44eb}
+\label{sec:orgd75a62c}
 \begin{itemize}
 \item \texttt{FILTER\_TAP\_NUM 30} -> for implementing a high pass filter (originally, there were 29 tap values) are used that is filter coefficient values as per designed filter values. Since the number of taps needs to be even, I made the last tap have the value as 0
 \item \texttt{INPUT\_PROCESS\_BUF\_SIZE 512} –> 512 samples will be processed in a single block. This was deemed optimal for maximal processing while signalling to display to UART and writing to a file
@@ -129,15 +144,21 @@ Since we are working on a large amount of continuous analog input data, where re
 \item \texttt{OUTPUT\_BUF\_CHAR\_SIZE (OUTPUT\_PROCESS\_CHAR\_BUF\_SIZE * 2)} -> Maps to other part
 \end{itemize}
 
-\subsection{Reason to choose Q15}
-\label{sec:org402e760}
+\subsection{Reason to choose q15\textsubscript{t} for processing}
+\label{sec:org4e4d7a8}
 
 The Q15 number has a integral range between \texttt{(-2\textasciicircum{}16)} and \texttt{(2\textasciicircum{}16 - 1)}, scaled up from (-1.0, 1.0) w.r.t. floating point numbers. Since the operations in this type are done between integral types which are much faster than their counterparts (floating point types), it makes it very convenient in DSP where real time processing has to be completed.
 
 \subsection{Flow of data in buffers}
-\label{sec:org658853b}
+\label{sec:orgf002b05}
 
-The input buffer size has a double size of the input process buffer size. The input data from ADC will store in the input buffer. When half input buffer will be full (we can call it a single block) then the flag \texttt{write\_file\_chunk\_flag} will generate and indicate that the input buffer is half full and will trigger the process function/event for that block. Then that half-full input buffer data will be used for processing. After processing is completed, that processed data will store in half of the output buffer. Then that integer data will store in the output character buffer in the form of a string that data will show on the UART.  Simultaneously, while processing the first block or half input buffer, the remaining half input buffer will store data via DMA, after completely full the input buffer then again flag \texttt{write\_file\_chunk\_flag} will generate and indicate the input buffer is full and again trigger the process function/event for remained data in half input buffer that is the second block. That processed data will store in the output buffer and again data will pass to the output char buffer from the output buffer for showing data on UART. After the flag is generated \texttt{write\_file\_chunk\_flag} ADC will start storing data in the input buffer via DMA peripheral. This process is continued in a circular manner. In this project we are working with a large amount of data hence DMA is working as the pipeline for storing data in buffers and also sending data to UART.
+\begin{itemize}
+\item The input buffer size has a double size of the input process buffer size. The input data from ADC will store in the input buffer. When half input buffer will be full (we can call it a single block) then the interrupt for the DMA will update the pointers to the input and output buffers and update the the flag \texttt{write\_file\_chunk\_flag}. This will further trigger the \texttt{process\_data} function/event for that block. After processing is completed, that processed data will store in half of the output buffer.
+\item Also, the data which is currently in the form of integers will be stored in the output character buffer in the form of a string that will be shown on the UART terminal.
+\item Simultaneously, while processing the first block or half input buffer, the remaining half input buffer will store data via DMA, after completely full the input buffer and the ping buffer previously will become the pong buffer and the the two buffers will now play the opposite roles.
+\item This process is continued in a circular manner.
+\item In this project we are working with a large amount of data hence DMA is working as the pipeline for storing data in buffers and also sending data to UART.
+\end{itemize}
 
 \begin{figure}[H]
     \centering
@@ -146,31 +167,74 @@ The input buffer size has a double size of the input process buffer size. The in
     \end{figure}
 
 \subsection{Interrupts}
-\label{sec:org86f3d13}
-
-\begin{itemize}
-\item Half full
-\item Full full
-\item robot effect
-\end{itemize}
+\label{sec:org5278ae5}
+\subsubsection*{Half buffer Interrupt ADC}
+\label{sec:org165f908}
+Used to indicate first half input buffer is full and to trigger the processing activity. If 512 samples will be filled in the input buffer then this half buffer interrupt will generate and will trigger processing activity for that stored data.
+\subsubsection*{Full buffer Interrupt ADC}
+\label{sec:org2edbc22}
+Used to indicate the input buffer is full and to trigger processing activity for that stored data. When the second half input buffer will full then the second interrupt will interrupt the input process and will indicate the input buffer is full and will trigger the processing activity for the remaining input data.  After triggering the processing activity again input will start to store input buffer in the first half input buffer.
+\subsubsection*{Robot effect Interrupt}
+\label{sec:org3b85eec}
+Used to toggle the robot effect flag. If there is no privacy mode then high pass filtered data will directly show on UART and will pass to FFT. When pressing the robot effect button then it will interrupt the process of sending data to the UART directly from the high pass filter. That interrupt will send high pass filtered output data into robot effect processing activity and then the output data will show on UART.
+\subsubsection*{Save file Interrupt}
+\label{sec:orge52fba7}
+The interrupt is not handled as a EXT GPIO interrupt. Instead, the value is read at an appropriate time (so as to avoid race conditions), which debounce functionality. If the read value is 1 (then an indication is sent to save the file).
 
 \subsection{Timers}
-\label{sec:org88b2049}
+\label{sec:org7a9c2b4}
 
 \begin{itemize}
-\item \texttt{TIM2} for the ADC's DMA to synchronize to input values and store them into the input buffer. It was chosen since the timer needed to be somewhat advanced with supported DMA and interrupts.
-\item \texttt{TIM9} as the timebase source for RTOS. It was chosen because the timebase source needed to be simple enough for count reference.
+\item \texttt{TIM2} for the ADC's DMA to synchronize to input values and store them into the input buffer. It was chosen since the timer needed to be somewhat advanced with supported DMA and interrupts. We set it's Prescaler as \texttt{10-1}, and the counter to \texttt{2500-1} to get desired input samples in real-time at the desired frequency. By this setting, we will get around 4000 samples in 1 sec. As \texttt{TIM2} starts ADC will start taking input values and will store output values in the input buffer via DMA synchronized with \texttt{TIM2}.
+\item \texttt{TIM9} as the timebase source for FreeRTOS. It was chosen because the timebase source needed to be simple enough for count reference.
 \end{itemize}
 
 \subsection{Input data / ADC}
-\label{sec:org05730ed}
+\label{sec:org1cd3647}
 
+\begin{itemize}
+\item The microphone is connected to ADC peripheral to convert analog signals to digital signals. The microphone will send acoustic waveforms of input audio to ADC peripheral. ADC peripheral will convert that analog signal into digital data that digital data ADC stores input data in the input buffer via DMA peripheral.
+\item For taking real-time input, the CPU clock is set to 100MHz, and to take ADC samples for the desired frequency ADC clock Prescaler is set to \texttt{10-1} i.e., PCLK divided 10 and resolutions to 12 bits (15 ADC clock cycles) which means will take values between 0 to 2\textsuperscript{12} bits.
+\item Hence ADC samples can be taken independently from the CPU clock. The \textbf{sampling frequency} is calculated by the formula
 
-The microphone is connected to ADC peripheral to convert analog signals to digital signals. The microphone will send acoustic waveforms of input audio to ADC peripheral. ADC peripheral will convert that analog signal into digital data that digital data ADC stores input data in the input buffer via DMA peripheral.
-For taking real-time input, the CPU clock is set to 100MHz, and to take ADC samples for the desired frequency ADC clock Prescaler is set to 25MHz i.e., PCLK divided 4 and resolutions to 12 bits (15 ADC clock cycles) which means will take values between 0 to 2\textsuperscript{12} bits. Hence ADC samples can be taken independently from the CPU clock. The \textbf{sampling frequency} is 4000Hz which means in 1 sec 4000 samples will take.  Also, connect DMA peripheral to the ADC1 peripheral to send a large amount of data from the peripheral to memory.  The microphone will send acoustic waveforms to ADC and will convert that analog signal into digital signals. That digital signals or sampling data will store in the input buffer for processing. Plotted that data in the form of a graph in MATLAB it is observed that the microphone is receiving a large amount of data which has different frequencies with the fluctuation in amplitude.
+\begin{verbatim}
+Sampling rate = (f_PCLK2 / prescaler) / (N_s + N_c)
+
+where
+
+f_PCLK2 = 100MHz
+prescaler = 10 - 1
+N_s = 2500 - 1
+N_c = 15
+
+\end{verbatim}
+\end{itemize}
+
+Hence, the sampling rate is around 4000Hz
+
+\begin{verbatim}
+Sampling rate = (100 Mhz / 4) / (2500 + 15) = 4000 Hz
+\end{verbatim}
+
+\begin{itemize}
+\item Also, we connect DMA peripheral to the ADC1 peripheral to send a large amount of data from the peripheral to memory without disturbing the clock cycles once the DMA pipelines have been set.
+\item The microphone will send acoustic waveforms to ADC and will convert that analog signal into digital signals. That digital signals or sampling data will be stored in the input buffer for processing.
+\end{itemize}
+
+\subsection{FreeRTOS}
+\label{sec:org13adad4}
+
+FreeRTOS provides the core real-time scheduling functionality, inter-task communication, timing, and synchronization primitives, described as a real-time executive. Here in this project since we have concurrency and we need to keep the CPU busy waiting time as minimal as possible (considering that we are processing data, saving files on an SD card, and sending output data on LCD as loosely coupled entities). Hence FREERTOS is being used in the project. There are 3 tasks created for (a) processing data, (b) saving files on SD card, and (c) sending output data on LCD. As of now, all the priorities are set equal and these three tasks will schedule accordingly.
+
+The causal relations are defined as
+
+\begin{itemize}
+\item Only when the buffer has been processed, send it once to UART and writing to the file
+\item Only update the lcd values after each second
+\end{itemize}
 
 \section{Data processing}
-\label{sec:orgb86537f}
+\label{sec:orgb3d89a2}
 
 \begin{figure}[H]
     \centering
@@ -178,12 +242,15 @@ For taking real-time input, the CPU clock is set to 100MHz, and to take ADC samp
     \caption{Processing}
     \end{figure}
 
-\subsection{High pass filter}
-\label{sec:org7e532f7}
+To process the data in the MCU, the CMSIS DSP software library is used (v4.35) [2]. In particular \texttt{arm\_math.h} library and lib file are imported into the project which has functions on FIR filtering, FFT transforms, maximal amplitudes, etc.
 
-A high pass filter is a filter that passes high-frequency signals and blocks, or impedes, low-frequency signals. A high pass filter is used to remove frequencies below 200Hz.
-To implement a high pass filter on MCU, the CMSIS DSP software library is used. In particular arm\textsubscript{math.h} library and lib file are imported into the project which has functions of a high-pass filter.
-FIR filter is designed by using \url{http://t-filter.appspot.com} this software, got the desired tap values that is filter coefficient values for implementing the high pass filter in the project. For designing set values according to project task requirements which are as follows.
+\subsection{High pass filter}
+\label{sec:orgfa5b1c4}
+
+\begin{itemize}
+\item A high pass filter is a filter that passes high-frequency signals and blocks, or impedes, low-frequency signals. For this step, we use a custom FIR filter which is used to remove frequencies below 200Hz.
+\item The corresponding FIR filter is designed by using T-Filter [1]. Using this software, we got the desired tap values that is filter coefficient values for implementing the high pass filter in the project. For designing set values according to project task requirements which are as follows:
+\end{itemize}
 
 
 \begin{table}[htbp]
@@ -196,7 +263,7 @@ from & to & gain & Ripple/Attenuation & Actual Ripple\\
 220 Hz & 2000 Hz & 1 & 5 dB & 4.14 dB\\
 \hline
 \end{tabular}
-\caption{Highway Management Output Logic}
+\caption{High Pass Filter Logic}
 
 \end{table}
 
@@ -208,87 +275,178 @@ from & to & gain & Ripple/Attenuation & Actual Ripple\\
     \end{figure}
 
 
-29 tap values that are filter coefficients are required for this designed high pass filter. The input process buffer has a size of 512 which means 512 samples will be processed in a single block.
-When flag \texttt{write\_file\_chunk\_flag==1} is generated it will trigger the process function which means 512 samples are stored in the input process buffer.
-For implementing a high-pass filter DSP library needs some internal FIR instance settings hence FIR instance declared \texttt{arm\_fir\_instance\_q15 fir\_settings} and also needs internal FIR states which have a size always equal to \texttt{INPUT\_PROCESS\_BUF\_SIZE + FILTER\_TAP\_NUM - 1}.
-For processing DSP library has single line function that is:
+\begin{itemize}
+\item We require 29 tap values (filter coefficients) to design the high pass filter.
+\item When a part of the input is ready to be processed, we call the \texttt{process\_data()} function, where blocks of 512 samples are stored in the input process buffer.
+\item For implementing a high-pass filter the DSP library needs to instantiate the required FIR settings. Hence, we declare an FIR instance \texttt{arm\_fir\_instance\_q15 fir\_settings} and also needs internal FIR states which have a size always equal to \texttt{INPUT\_PROCESS\_BUF\_SIZE + FILTER\_TAP\_NUM - 1}.
+\item Finally, for applying the FIR DSP library has the corresponding function as:
+\end{itemize}
 
 \begin{verbatim}
 arm_fir_q15(&fir_settings, in_buf_ptr, out_buf_ptr, INPUT_PROCESS_BUF_SIZE);
 \end{verbatim}
 
-Here, we passed the address for FIR instance setting, input buffer pointer for processing input data, and output buffer pointer to store processed output data in the output buffer. Output data will store in the output buffer for further process and data to display on UART.
-Below 200Hz frequency will filter out and amplitude will be normalized. By using a high-pass filter.
-After using a high pass filter, we have given an offset of 2000 to normalize amplitude. We implemented this calculation of negative values is difficult to do. for easy implementation of further processes.
+\begin{itemize}
+\item Here, we passed the address for FIR instance setting, input buffer pointer for processing input data, and output buffer pointer to store processed output data in the output buffer. Output data will store in the output buffer for further process and data to display on UART.
+\item In the process, frequency below 200Hz will be filtered out and amplitude will be normalized.
+\item After using a high pass filter, we give an offset of 2000 to keep the amplitude in suitable form for further processing / displaying on UART / saving to file. (since further calculation of negative values is difficult to do and is less feasible).
+\end{itemize}
 
 \subsection{Robot effect}
-\label{sec:org091cd0a}
+\label{sec:org1a82100}
 For robot effect here fast delay implemented
 
 \subsubsection*{Fast delay}
-\label{sec:org41fadc2}
-Here implemented fast delay. We took an average of 5 samples. Divided samples into chunks and take an average of the previous four samples and one current sample.  That averaged samples frequency reach at 9000 the again samples normalized again we put offset of -7000. and saved data into the input process buffer
-\subsubsection*{High pass filter}
-\label{sec:org05f91bd}
-That data again passed to a high pass filter to remove low-frequency data. After passing again gave an offset of 2000 to normalize the amplitude of processed data.
+\label{sec:orgc993d31}
+\begin{itemize}
+\item Here, we have implemented fast delay. We took the summation of 5 samples with the following formula w.r.t. real time signal:
+\end{itemize}
 
+\begin{verbatim}
+a[n] = ATT_FACTOR * (a[n] + a[n - 1] + a[n - 2] + a[n - 3] + a[n - 4])
+\end{verbatim}
+
+\begin{itemize}
+\item Here, \texttt{ATT\_FACTOR} is used to keep the echo more realistic in nature. It could be set between 0 and 1. In this case, I have set it to 1.
+\item Note that since the robot is taken w.r.t. buffers, it supports wrap-around logic; i.e. a[0] would consist of the sum of \texttt{a[508 - 511]} and itself.
+\item In short, we divided samples into chunks and take the summation of the previous four samples and one current sample.
+\item In addition to summing, we reduce the offset of the signal by \texttt{7000} to normalize the signal again, so that it doesn't overflow while we do the FIR filtering.
+\end{itemize}
+\subsubsection*{High pass filter}
+\label{sec:org53ae40d}
+That data again passed to a high pass filter to remove low-frequency data created by the robot filter itself (depending on the user the cutoff frequency could be different, we assumed that it was the same as before so we kept the same taps for this time too). After passing the signal through a FIR filter again, we provided an offset of 2000 to keep the amplitude of processed data in acceptable ranges before for sending it to UART / saving it.
+
+\subsubsection*{Output}
+\label{sec:org050fe83}
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{SD_Read.pdf}
     \caption{SD Card File Output Read}
     \end{figure}
 
+\begin{itemize}
+\item The same speech ``Hello testing UART'' gives two different types of outputs on the basis of whether the robot effect is on or not. As shown in figure 5, the first disturbance is without the robot effect and the second disturbance is with the robot effect (spaced out amplitudes but having higher overall frequency due to meshing of sound), we can see the transformation in the signals before and after processing.
+\item In the first disturbance, only low-frequency signals are filtered out where the amplitude of the signals is less and no delay in the signals.
+\item But in the second disturbance where the robot effect is applied the amplitude of the signals is increased and normalized around 2000 and also has a delay in the signals.
+\item We can also see the filtering of low signal output having low ripple and attenuation (almost ignored in the final generated sound file)
+\end{itemize}
+
 \subsection{FFT}
-\label{sec:org33bc954}
+\label{sec:org3b72ac7}
 
-Data is copied in a separate bufffer for calculating FFT. Complex magnitude is taken and maximal of those is taken
+For implementing FFT, since we are taking it for a buffer in the real domain, we use the inbuilt function \texttt{arm\_rfft\_q15} with the appropriate settings. The output buffer will be twice the size of the input buffer (since it contains both real and complex amplitudes), and the input buffer will be modified. Hence
+\begin{itemize}
+\item \texttt{fft\_output} = \texttt{2 * fft\_input} w.r.t. size
+\item We need to make \texttt{fft\_input} as a separate buffer and cannot directly use \texttt{out\_buf} since the input buffer is modified according to the documentation.
 
-The maximum value is printed every second
+\item Hence, we use the following function with the parameters
+\end{itemize}
+\begin{verbatim}
+arm_rfft_q15(&fft_settings, (q15_t* ) fft_input, fft_output);
+\end{verbatim}
+
+\begin{itemize}
+\item Now, since we have the output in the complex range, we need to calculate the magnitude first. We can do that by using the function \texttt{arm\_cmplx\_mag\_q15}. Before doing that, we also need to upscale the output by 256 times to prevent underflow errors
+\end{itemize}
+
+\begin{verbatim}
+	for (int i = 0; i < OUTPUT_PROCESS_BUF_SIZE * 2; i++) {
+		fft_output[i] <<= 8;
+	}
+    arm_cmplx_mag_q15(fft_output, fft_output, OUTPUT_PROCESS_BUF_SIZE);
+\end{verbatim}
+
+\begin{itemize}
+\item We store the list of magnitudes in the first half of \texttt{fft\_output} itself (to save buffer space)
+
+\item Finally, the maximum value of the calculated magnitudes in a frame is taken and the amplitude and frequency are stored in \texttt{max\_ampl} and \texttt{max\_fft\_freq} respectively
+\end{itemize}
+
+\begin{verbatim}
+arm_max_q15(&fft_output[1], OUTPUT_PROCESS_BUF_SIZE - 1, &max_ampl, &max_fft_freq);
+\end{verbatim}
+
+\begin{itemize}
+\item From here, \texttt{max\_fft\_freq} is checked for the appropriate values to check for sound activities. The value is polled at every second at the LCD where the output is shown. But the value is calculated everytime to detect sound activity.
+\end{itemize}
 
 \subsection{Sound activity}
-\label{sec:org0ff945c}
+\label{sec:orgabbf73a}
 
-If maximum FFT Freq < 200Hz then no sound else sound
+If \texttt{max\_fft\_freq} < 200Hz then no sound is detected else sound is detected. A mini timer through \texttt{fft\_counter} is implemented to debounce any mistakes in no sound being detected (5 seconds for no sound pop up to come up, and 1 second of contiguous voice to start the process again)
+
+\subsection{Conversion to out\textsubscript{char}\textsubscript{buf}}
+\label{sec:orgfb7020a}
+
+The following statement is used:
+\begin{verbatim}
+sprintf (sample_out_msg, "%4.4hd\n", out_buf_ptr[i]);
+\end{verbatim}
+
+for each value in output buffer which is ready to convert it in \texttt{sample\_out\_msg} (then used in \texttt{out\_buf\_char\_ptr}). \texttt{sprintf} takes care of padding with 0's (if there are less than 4 digits), trimming (if there are more than 4 digits), and separating each input by \texttt{\textbackslash{}n}
 
 
 \section{Output data}
-\label{sec:org88c9124}
+\label{sec:orgba2a735}
 
 \subsection{UART}
-\label{sec:org0468f83}
+\label{sec:orgfae9878}
 
-When flag \texttt{write\_file\_chunk\_flag ==1} then sample block will go to processing. When the process will complete, the processed data will store in the output buffer \texttt{out\_char\_buf}. To display processed data via serial communication on PC that stored data will send to UART in string form. A UART Terminal Client is used to display data on pc via serial communication (For example Hercules / CoolTern). Baud rate is set to 230400 baud.
+As soon as one block of the data is processed, it's character representation is stored in the output buffer \texttt{out\_char\_buf}. To display processed data via serial communication on PC that stored data will be sent to UART. A UART Terminal Client is used to display data on pc via serial communication (For example Hercules / CoolTerm). For the project, we have set the baud rate at the maximal possible speed (230400 baud).
 
-\subsubsection*{Graph}
-\label{sec:org1e8b54f}
-See code on appendix A
+\subsubsection*{Live Graph}
+\label{sec:orgc4c7576}
+See code on appendix A (shown during demonstration)
 
 \subsection{SD Card}
-\label{sec:org03ff77c}
-
+\label{sec:org02a5724}
 
 \subsubsection*{Mount}
-\label{sec:orge3faf3d}
-First will mount the SD card and check for it's successful mounting. If there is an error with the file system / other problems in mounting then the appropriate error message will be shown. For debugging purposes, we also check for the free space and calculate the total size of the SD card using the pointer and the size and free space of the SD. All the results are also displayed in UART.
-\subsubsection*{Write}
-\label{sec:orgcb88853}
+\label{sec:orgbc52f46}
 
-After processing the first block of sample data, the processed data will store in the output buffer[output\textsubscript{char}\textsubscript{buf}] then flag [write\textsubscript{file}\textsubscript{chunk}\textsubscript{flag}==2] will generate and will trigger the SD card saving function and also check whether another half input buffer has been filled after processing the first block. If there is a current file existed then the current file opens and filling data in the SD card will start and will save data in the current file in the SD card in string form. When writing will be done then the current file will close. If there is no current file then a new file will generate and open that file for writing the data.
-To save multiple files on an SD card, the names of files should be different for different data hence we updated file names as data updated. To save a new file with a different name on an SD card the name of the file will change with the current file number changes.
-Here we have used a switch to save files which means that if press switch then the current file will close and the new file will open and data will store in the new file.
+Initially, the file system of the SD card is mounted into memory and checked for success/failure. If there is an error with the file system / other problems in mounting then the appropriate error message will be shown. For debugging purposes, we also check for the free space and calculate the total size of the SD card using the pointer and the size and free space of the SD. These results are also displayed in UART, and after the initialization time, data is started to be written into the buffer.
+\subsubsection*{Write}
+\label{sec:org22a26c2}
+
+\begin{itemize}
+\item After processing a block of sample data in ping, the processed data will be stored in the output buffer (\texttt{output\_char\_buf}) and the necessary flag will be generated to (a) enable the SD card saving function (b) Enable DMA to send the processed data to UART. Contiguous writing of the appropriate block of \texttt{output\_char\_buf} (first/second) will be send on the basis of which block is ready as of now.
+
+\item The file is only closed when the user presses the external button for saving the file. The process of opening and closing the file is not done again and again since then we would need to use \texttt{seek} in it again and again, making the total time \texttt{O(n\textasciicircum{}2)} for saving a block of size n. Only writing and closing the file once and making up a new file with the button would taken \texttt{O(n)} time which is linear, and because of that we could handle arbitary lengths on input since real-time processing needs to be done in that time.
+
+\item If there is no current file then a new file will generate and open that file for writing the data (\texttt{FA\_OPEN\_ALWAYS | FA\_WRITE}). To save multiple files on an SD card, the names of files are named numerically with the name \texttt{SDCard\_Save\_*.txt}, where \texttt{*} is replaced with the current number (starting from 1 initially).
+
+\item An external switch is used to save files. Upon reading the button (with appropriate debouncing), if an input still exists, then the current file will close (saving it to the FAT filesystem), a new file with the incremented number to be saved will open and the real time processed data from that time will be stored there.
+\end{itemize}
 
 
 \subsection{LCD}
-\label{sec:org87487ab}
+\label{sec:org4fc51e4}
 
-If the frequency of input data is below 200Hz then no sound is detected message will show on LCD and if input data frequency is above 200Hz then maximum frequency and robot effect is on or off will show on the LCD.
+If the frequency of input data is
+\begin{itemize}
+\item (a) below/at 200Hz => a message saying \texttt{No sound detected} will be shown
+\item (b) otherwise => the maximum frequency and the status of the robot effect (0 = off, 1 = on) will be shown.
+\end{itemize}
 
-Max = 0000 and R 0 if the robot effect is off and R 1 if the robot effect is on.
 
+For example, if the robot effect is on, and the dominant frequency is 1234Hz, then the output will be \texttt{Max = 1234   R 1}
+\section{Challenges Faced}
+\label{sec:orge173432}
+\begin{itemize}
+\item Abhaas Goyal (u7145384): Learning the bolts and nuts of digital signal processing and how it can be used for the project. Also learnt a lot on how to work with a team partner who has very different strengths than yourself. Integrating external library of CMSIS was also enriching w.r.t. learning. Learnt some theoretical concepts from my project partner and the tutors
+
+\item Kaushiki Jadhav (u7423787): Understanding of logic behind the task and event in theory was within my grasp but I had a lot of difficulty in implementing that theoretical knowledge into programming.
+\end{itemize}
+
+\section{References}
+\label{sec:orgc9acf03}
+[1] T-Filter \url{http://t-filter.engineerjs.com/} \\
+
+[2] CMSIS DSP \url{https://arm-software.github.io/CMSIS\_5/DSP/html/modules.html}
 \section{Appendix}
-\label{sec:org36b9c13}
+\label{sec:org135c0cf}
 \subsection{Graph plot}
-\label{sec:org9c7e5d3}
+\label{sec:org48160dc}
 
 \begin{verbatim}
 import serial
